@@ -2,8 +2,37 @@ const express = require('express');
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
+const mongoose = require('mongoose');
 
-let messages = [];
+const Message = require('./models/Message');
+
+mongoose
+  .connect('mongodb://localhost:27017/real-time-chat', {
+    useNewUrlParser: true
+  })
+  .then(result => console.log('MongoDB Connected'))
+  .catch(err => console.log(err));
+
+console.log(
+  Message.find()
+    .sort({ date: -1 })
+    .then(msgs => {
+      if (msgs) {
+        let arr = msgs.map(item => 
+          return {
+            item: item._id,
+            message: item.message,
+            author: item.author,
+            date: item.date
+          }
+        );
+
+        return arr;
+      }
+    })
+);
+
+const messages = [];
 
 io.on('connection', socket => {
   console.log(`socket: ${socket.id}`);
@@ -11,10 +40,15 @@ io.on('connection', socket => {
   socket.emit('previousMessages', messages);
 
   socket.on('sendMessage', data => {
-    messages.push(data);
+    new Message(data)
+      .save()
+      .then(result => {
+        console.log(result);
 
-    socket.emit('receivedMessage', data);
-    socket.broadcast.emit('receivedMessage', data);
+        socket.emit('receivedMessage', result);
+        socket.broadcast.emit('receivedMessage', result);
+      })
+      .catch(err => console.log(err));
   });
 });
 

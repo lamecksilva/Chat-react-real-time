@@ -36,6 +36,7 @@ class App extends Component {
 
     if (username.length && message.length) {
       socket.emit('sendMessage', { author: username, message });
+      this.setState({ message: '' });
     }
   };
 
