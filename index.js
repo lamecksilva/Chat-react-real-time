@@ -14,7 +14,7 @@ mongoose
   .catch(err => console.log(err));
 
 const getMessages = async () => {
-  const messages = await Message.find({}, {}, { sort: { date: -1 } }).limit(10);
+  const messages = await Message.find({}, {}, { sort: { date: 1 } }).limit(5);
 
   await messages.map(message => {
     return {

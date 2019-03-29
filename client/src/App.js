@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import io from 'socket.io-client';
 
 import './App.css';
+import Tiro from './tiro.mp3';
 
 let socket;
 class App extends Component {
@@ -15,11 +16,21 @@ class App extends Component {
     };
   }
 
+  audio = new Audio(
+    // 'https://notificationsounds.com/soundfiles/1728efbda81692282ba642aafd57be3a/file-sounds-1101-plucky.mp3'
+    Tiro
+  );
+
+  play() {
+    this.audio.play();
+  }
+
   componentDidMount() {
     socket = io('http://192.168.11.12:9000');
     socket.on('previousMessages', messages => this.setState({ messages }));
 
     socket.on('receivedMessage', message => {
+      this.play();
       this.setState({ messages: [...this.state.messages, message] });
       this.scrollToBottom();
     });
