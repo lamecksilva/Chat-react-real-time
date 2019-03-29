@@ -41,8 +41,8 @@ button {
 }
 
 .messages {
-  width: 600px;
-  height: 320px;
+  max-width: 600px;
+  max-height: 300px;
   margin: 20px 0;
   border: 1px solid #ddd;
   padding: 20px;
