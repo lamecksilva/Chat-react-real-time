@@ -13,31 +13,22 @@ mongoose
   .then(result => console.log('MongoDB Connected'))
   .catch(err => console.log(err));
 
-console.log(
-  Message.find()
-    .sort({ date: -1 })
-    .then(msgs => {
-      if (msgs) {
-        let arr = msgs.map(item => 
-          return {
-            item: item._id,
-            message: item.message,
-            author: item.author,
-            date: item.date
-          }
-        );
+const getMessages = async () => {
+  const messages = await Message.find({}, {}, { sort: { date: -1 } }).limit(10);
 
-        return arr;
-      }
-    })
-);
+  await messages.map(message => {
+    return {
+      ...message._doc
+    };
+  });
 
-const messages = [];
+  return messages;
+};
 
-io.on('connection', socket => {
+io.on('connection', async socket => {
   console.log(`socket: ${socket.id}`);
 
-  socket.emit('previousMessages', messages);
+  socket.emit('previousMessages', await getMessages());
 
   socket.on('sendMessage', data => {
     new Message(data)

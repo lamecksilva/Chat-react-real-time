@@ -16,11 +16,13 @@ class App extends Component {
   }
 
   componentDidMount() {
-    socket = io('http://localhost:9000');
+    socket = io('http://192.168.11.12:9000');
     socket.on('previousMessages', messages => this.setState({ messages }));
-    socket.on('receivedMessage', message =>
-      this.setState({ messages: [...this.state.messages, message] })
-    );
+
+    socket.on('receivedMessage', message => {
+      this.setState({ messages: [...this.state.messages, message] });
+      this.scrollToBottom();
+    });
   }
 
   handleChange = event => {
@@ -35,32 +37,48 @@ class App extends Component {
     const { username, message } = this.state;
 
     if (username.length && message.length) {
-      socket.emit('sendMessage', { author: username, message });
+      socket.emit('sendMessage', { author: username, message: message });
       this.setState({ message: '' });
     }
   };
+
+  scrollToBottom() {
+    const scrollHeight = this.messageList.scrollHeight;
+    const height = this.messageList.clientHeight;
+    const maxScrollTop = scrollHeight - height;
+    this.messageList.scrollTop = maxScrollTop > 0 ? maxScrollTop : 0;
+  }
 
   render() {
     return (
       <div className="App">
         <form id="chat" onSubmit={this.handleSubmit}>
+          <label>Username</label>
           <input
             type="text"
             name="username"
+            value={this.state.username}
             placeholder="Type your username"
             onChange={this.handleChange}
           />
-          <div className="messages">
+          <div
+            className="messages"
+            ref={div => {
+              this.messageList = div;
+            }}
+          >
             {this.state.messages.map(msg => (
-              <div className="message">
+              <div key={msg._id} className="message">
                 <strong>{msg.author}: </strong>
-                {msg.message}{' '}
+                {msg.message}
               </div>
             ))}
           </div>
+          <label>Message</label>
           <input
             type="text"
             name="message"
+            value={this.state.message}
             placeholder="Type your message"
             onChange={this.handleChange}
           />
