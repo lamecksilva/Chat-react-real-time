@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import io from 'socket.io-client';
 
 import './App.css';
-import Tiro from './tiro.mp3';
+import Shot from './shot.mp3';
 
 let socket;
 class App extends Component {
@@ -18,7 +18,7 @@ class App extends Component {
 
   audio = new Audio(
     // 'https://notificationsounds.com/soundfiles/1728efbda81692282ba642aafd57be3a/file-sounds-1101-plucky.mp3'
-    Tiro
+    Shot
   );
 
   play() {
@@ -26,7 +26,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    socket = io('http://192.168.11.12:9000');
+    socket = io('http://192.168.25.10:9000');
     socket.on('previousMessages', async messages => {
       await messages.sort((a, b) => new Date(a.date) - new Date(b.date));
       console.log(messages);
@@ -34,6 +34,7 @@ class App extends Component {
     });
 
     socket.on('receivedMessage', async message => {
+      console.log(message);
       this.play();
       this.setState({ messages: [...this.state.messages, message] });
       this.scrollToBottom();
@@ -69,8 +70,8 @@ class App extends Component {
     return (
       <div className="container">
         <div className="row">
-          <div className="col-12 d-flex col-xs-12">
-            <div className="mx-auto">
+          <div className="col-md-12 d-flex col-xs-12">
+            <div className="mx-auto col-md-8">
               <h4 className="text-center mt-3">Chat App</h4>
               <form onSubmit={this.handleSubmit} className="col-xs-12">
                 <div className="form-group col-xs-12">
@@ -93,13 +94,14 @@ class App extends Component {
                 >
                   {this.state.messages.map(msg => (
                     <div key={msg._id} className="list-group-item">
-                      <strong>{msg.author}: </strong>
-                      {msg.message}
-                      {'   '}
                       <small>
                         {new Date(msg.date).getHours()}:
                         {new Date(msg.date).getMinutes()}
                       </small>
+                      {'  '}
+                      <strong>{msg.author}: </strong>
+                      {msg.message}
+                      {'  '}
                     </div>
                   ))}
                 </div>
